@@ -1,8 +1,8 @@
 <script lang="ts">
   import { invoke } from '@tauri-apps/api/core';
-  import SettingRow from '$lib/components/Setting.svelte';
+  import Setting from '$lib/components/Setting.svelte';
 
-  type Setting = any;
+  type SettingDesc = any; // keep in sync with backend Setting
   type SettingItemState = {
     key: string;
     user_value: any;
@@ -13,10 +13,10 @@
   };
 
   let loading = $state(true);
-  let registry = $state<Setting[]>([]);
+  let registry = $state<SettingDesc[]>([]);
   let items = $state<SettingItemState[]>([]);
 
-  let byKey: Map<string, SettingItemState> = $derived.by(() => {
+  let stateByKey = $derived.by(() => {
     const m = new Map<string, SettingItemState>();
     for (const it of items) m.set(it.key, it);
     return m;
@@ -26,7 +26,7 @@
     (async () => {
       try {
         const [reg, st] = await Promise.all([
-          invoke<Setting[]>('settings_get_registry'),
+          invoke<SettingDesc[]>('settings_get_registry'),
           invoke<SettingItemState[]>('settings_get_state')
         ]);
         registry = reg;
@@ -54,7 +54,8 @@
   {:else}
     <div class="space-y-3">
       {#each registry as item (item.key)}
-        <SettingRow item={item} itemState={byKey.get(item.key)} onStatePatched={patchState} />
+        <!-- pass the MAP, not a single item -->
+        <Setting item={item} {stateByKey} onStatePatched={patchState} />
       {/each}
     </div>
   {/if}
