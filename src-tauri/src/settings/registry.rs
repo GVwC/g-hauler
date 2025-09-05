@@ -17,6 +17,22 @@ pub static SETTINGS_REGISTRY: Lazy<Vec<Setting>> = Lazy::new(|| {
             system_managed: true, // handled via adapter
         },
         Setting {
+            key: "theme".into(),
+            label: "Theme".into(),
+            description: Some("Choose appearance".into()),
+            category: SettingCategory::Interface,
+            default_value: json!("system"),
+            setting_type: SettingType::Select {
+                options: vec![
+                    SelectOption { value: "system".into(), label: "System".into(), description: None },
+                    SelectOption { value: "light".into(),  label: "Light".into(),  description: None },
+                    SelectOption { value: "dark".into(),   label: "Dark".into(),   description: None },
+                ],
+            },
+            requires_restart: false,
+            system_managed: false,
+        },
+        Setting {
             key: "lghub_data_path".into(),
             label: "G HUB data location".into(),
             description: Some("Folder that contains G HUB data (e.g. ProgramData/LGHUB)".into()),
@@ -24,12 +40,11 @@ pub static SETTINGS_REGISTRY: Lazy<Vec<Setting>> = Lazy::new(|| {
             default_value: json!(r"C:\ProgramData\LGHUB"),
             setting_type: SettingType::Path {
                 directory: true,
-                extensions: None, // not used for directories
+                extensions: None,
             },
             requires_restart: false,
-            system_managed: false, // no OS side-effect, just a stored path
+            system_managed: false,
         },
-        // …add more settings here later
     ]
 });
 

@@ -3,6 +3,7 @@
   import { invoke } from '@tauri-apps/api/core';
   import { open } from '@tauri-apps/plugin-dialog';
   import Switch from './ui/Switch.svelte';
+  import { setTheme } from '$lib/theme';
 
   // Types kept in sync with backend
   type SelectOption = { value: string; label: string; description?: string };
@@ -63,6 +64,11 @@
         key: item.key,
         value
       });
+
+      if (item.key === 'theme' && (typeof value === 'string')) {
+        setTheme(value as 'light' | 'dark' | 'system');
+      }
+
       onStatePatched(next);
     } catch (e) {
       console.error(`Failed to set "${item.key}"`, e);
@@ -126,6 +132,20 @@
         disabled={saving || (rowState() && !rowState()!.capable)}
         onChange={({ checked }) => applyValue(checked)}
       />
+      
+    {:else if item.setting_type.type === 'select'}
+      <select
+        id={`${item.key}-setting`}
+        class="bg-neutral-800 text-white text-sm px-3 py-1.5 rounded-md outline-none border border-neutral-700/70"
+        value={String(currentValue<string>() ?? '')}
+        onchange={(e) => applyValue((e.target as HTMLSelectElement).value)}
+        disabled={saving}
+      >
+        {#each item.setting_type.options as opt}
+          <option value={opt.value}>{opt.label}</option>
+        {/each}
+      </select>
+
     {:else if item.setting_type.type === 'path'}
       <div class="flex items-center gap-2">
         <input
